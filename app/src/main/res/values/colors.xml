@@ -3,4 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="primary">#272a3b</color>
+    <color name="gray2">#EEEEEE</color>
+    <color name="basic_item_bg">@android:color/white</color>
+    <color name="orange_color">#ef6c00</color>
+    <color name="stroke_gray_color">#dddddd</color>
+    <color name="hint_text_color">#7f7f7f</color>
 </resources>

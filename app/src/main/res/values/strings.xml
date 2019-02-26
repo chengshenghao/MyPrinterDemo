@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">MyPrinterDemo</string>
+    <string name="command_type">指令类型:</string>
+    <string name="connect_type">连接类型:</string>
+    <string name="cmdtype_esc">ESC</string>
+    <string name="cmdtype_tsc">TSC</string>
+    <string name="cmdtype_cpcl">CPCL</string>
+    <string name="cmdtype_zpl">ZPL</string>
+    <string name="cmdtype_pin">针打</string>
+    <string name="please_connect">未连接打印机[点击选择]</string>
+    <string name="adapter_usbdevice">USB设备:</string>
+    <string name="choose_usb_device">选择USB设备</string>
+    <string name="tip_insert_usb_device">请插入USB设备</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="_main_connected">-连接成功</string>
+    <string name="_main_disconnect">-已断开连接</string>
+    <string name="connect">连接</string>
+    <string name="main_pls_choose_device">请先选择一个设备</string>
+    <string name="dialog_tip">提示</string>
+    <string name="dialog_back">返回</string>
 </resources>
