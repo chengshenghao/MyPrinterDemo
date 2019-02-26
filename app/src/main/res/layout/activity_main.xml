@@ -34,4 +34,12 @@
         android:layout_margin="10dp"
         android:text="@string/connect" />
 
+    <Button
+        android:id="@+id/btn_selftest_print"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/self_test_print"
+        />
+
 </LinearLayout>

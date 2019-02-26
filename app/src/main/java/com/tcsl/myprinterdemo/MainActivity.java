@@ -23,9 +23,12 @@ import android.widget.Toast;
 import com.rt.printerlibrary.bean.BluetoothEdrConfigBean;
 import com.rt.printerlibrary.bean.UsbConfigBean;
 import com.rt.printerlibrary.bean.WiFiConfigBean;
+import com.rt.printerlibrary.cmd.Cmd;
+import com.rt.printerlibrary.cmd.EscFactory;
 import com.rt.printerlibrary.connect.PrinterInterface;
 import com.rt.printerlibrary.enumerate.CommonEnum;
 import com.rt.printerlibrary.enumerate.ConnectStateEnum;
+import com.rt.printerlibrary.factory.cmd.CmdFactory;
 import com.rt.printerlibrary.factory.connect.PIFactory;
 import com.rt.printerlibrary.factory.connect.UsbFactory;
 import com.rt.printerlibrary.factory.printer.LabelPrinterFactory;
@@ -60,7 +63,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private PrinterFactory printerFactory;
     private ProgressBar pb_connect;
     private TextView tv_device_selected;
-    private Button btn_disConnect, btn_connect;
+    private Button btn_disConnect, btn_connect, btn_selftest_print;
     private PrinterInterface curPrinterInterface = null;
     @BaseEnum.ConnectType
     private int checkedConType = BaseEnum.CON_USB;
@@ -82,6 +85,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         tv_device_selected = findViewById(R.id.tv_device_selected);
         pb_connect = findViewById(R.id.pb_connect);
         btn_connect = findViewById(R.id.btn_connect);
+        btn_selftest_print = findViewById(R.id.btn_selftest_print);
     }
 
     /**
@@ -105,6 +109,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
      */
     public void addListener() {
         tv_device_selected.setOnClickListener(this);
+        btn_selftest_print.setOnClickListener(this);
         btn_connect.setOnClickListener(this);
     }
 
@@ -117,11 +122,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             case R.id.btn_connect:
                 doConnect();
                 break;
+            case R.id.btn_selftest_print://测试页打印
+                escSelftestPrint();
+                break;
             default:
                 break;
         }
     }
 
+    private void escSelftestPrint() {
+        CmdFactory cmdFactory = new EscFactory();
+        Cmd cmd = cmdFactory.create();
+        cmd.append(cmd.getHeaderCmd());
+        cmd.append(cmd.getLFCRCmd());
+        cmd.append(cmd.getSelfTestCmd());
+        cmd.append(cmd.getLFCRCmd());
+        rtPrinter.writeMsgAsync(cmd.getAppendCmds());
+    }
     /**
      * usb设备选择
      */

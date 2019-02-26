@@ -18,4 +18,5 @@
     <string name="main_pls_choose_device">请先选择一个设备</string>
     <string name="dialog_tip">提示</string>
     <string name="dialog_back">返回</string>
+    <string name="self_test_print">测试页打印</string>
 </resources>
