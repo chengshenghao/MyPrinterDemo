@@ -47,7 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity  extends BaseActivity implements View.OnClickListener, PrinterObserver {
+public class MainActivity extends BaseActivity implements View.OnClickListener, PrinterObserver {
     //权限申请
     private String[] NEED_PERMISSION = {
             Manifest.permission.CAMERA,
@@ -58,8 +58,6 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
     private static final int REQUEST_CAMERA = 0;
     private RTPrinter rtPrinter = null;
     private PrinterFactory printerFactory;
-    private RadioGroup rg_cmdtype;
-    private FlowRadioGroup rg_connect;
     private ProgressBar pb_connect;
     private TextView tv_device_selected;
     private Button btn_disConnect, btn_connect;
@@ -81,11 +79,25 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
     }
 
     public void initView() {
-        rg_cmdtype = findViewById(R.id.rg_cmdtype);
-        rg_connect = findViewById(R.id.rg_connect);
         tv_device_selected = findViewById(R.id.tv_device_selected);
         pb_connect = findViewById(R.id.pb_connect);
         btn_connect = findViewById(R.id.btn_connect);
+    }
+
+    /**
+     * 初始化打印相关信息
+     */
+    public void init() {
+        //初始化为针打printer
+//        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
+//        printerFactory = new UniversalPrinterFactory();
+//        rtPrinter = printerFactory.create();
+        PrinterObserverManager.getInstance().add(this);//添加连接状态监听
+        //默认指令类型为Esc
+        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
+        printerFactory = new ThermalPrinterFactory();
+        rtPrinter = printerFactory.create();
+        rtPrinter.setPrinterInterface(curPrinterInterface);
     }
 
     /**
@@ -94,7 +106,6 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
     public void addListener() {
         tv_device_selected.setOnClickListener(this);
         btn_connect.setOnClickListener(this);
-        radioButtonCheckListener();
     }
 
     @Override
@@ -111,34 +122,28 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
         }
     }
 
-    private void radioButtonCheckListener() {
-        rg_cmdtype.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+    /**
+     * usb设备选择
+     */
+    private void showUSBDeviceChooseDialog() {
+        final UsbDeviceChooseDialog usbDeviceChooseDialog = new UsbDeviceChooseDialog();
+        usbDeviceChooseDialog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
-                switch (i) {
-                    case R.id.rb_cmd_esc://esc
-                        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
-                        printerFactory = new ThermalPrinterFactory();
-                        rtPrinter = printerFactory.create();
-                        rtPrinter.setPrinterInterface(curPrinterInterface);
-//                        btn_barcode_print.setVisibility(View.VISIBLE);
-//                        btn_label_setting.setVisibility(View.GONE);
-                        break;
-                }
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                UsbDevice mUsbDevice = (UsbDevice) parent.getAdapter().getItem(position);
+                PendingIntent mPermissionIntent = PendingIntent.getBroadcast(
+                        MainActivity.this,
+                        0,
+                        new Intent(MainActivity.this.getApplicationInfo().packageName),
+                        0);
+                tv_device_selected.setText(getString(R.string.adapter_usbdevice) + mUsbDevice.getDeviceId()); //+ (position + 1));
+                configObj = new UsbConfigBean(BaseApplication.getInstance(), mUsbDevice, mPermissionIntent);
+                tv_device_selected.setTag(BaseEnum.HAS_DEVICE);
+//                isConfigPrintEnable(configObj);
+                usbDeviceChooseDialog.dismiss();
             }
         });
-
-        rg_connect.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
-                doDisConnect();//有切换的话就断开
-                switch (i) {
-                    case R.id.rb_connect_usb://usb
-                        checkedConType = BaseEnum.CON_USB;
-                        break;
-                }
-            }
-        });
+        usbDeviceChooseDialog.show(getFragmentManager(), null);
     }
 
     /**
@@ -175,30 +180,6 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
     }
 
     /**
-     * usb设备选择
-     */
-    private void showUSBDeviceChooseDialog() {
-        final UsbDeviceChooseDialog usbDeviceChooseDialog = new UsbDeviceChooseDialog();
-        usbDeviceChooseDialog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                UsbDevice mUsbDevice = (UsbDevice) parent.getAdapter().getItem(position);
-                PendingIntent mPermissionIntent = PendingIntent.getBroadcast(
-                        MainActivity.this,
-                        0,
-                        new Intent(MainActivity.this.getApplicationInfo().packageName),
-                        0);
-                tv_device_selected.setText(getString(R.string.adapter_usbdevice) + mUsbDevice.getDeviceId()); //+ (position + 1));
-                configObj = new UsbConfigBean(BaseApplication.getInstance(), mUsbDevice, mPermissionIntent);
-                tv_device_selected.setTag(BaseEnum.HAS_DEVICE);
-//                isConfigPrintEnable(configObj);
-                usbDeviceChooseDialog.dismiss();
-            }
-        });
-        usbDeviceChooseDialog.show(getFragmentManager(), null);
-    }
-
-    /**
      * 断开连接
      */
     private void doDisConnect() {
@@ -212,42 +193,6 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
         }
         tv_device_selected.setText(getString(R.string.please_connect));
         tv_device_selected.setTag(BaseEnum.NO_DEVICE);
-    }
-
-    /**
-     * 校验权限
-     */
-    private void CheckAllPermission() {
-        NO_PERMISSION.clear();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (int i = 0; i < NEED_PERMISSION.length; i++) {
-                if (checkSelfPermission(NEED_PERMISSION[i]) != PackageManager.PERMISSION_GRANTED) {
-                    NO_PERMISSION.add(NEED_PERMISSION[i]);
-                }
-            }
-            if (NO_PERMISSION.size() == 0) {
-                recordVideo();
-            } else {
-                requestPermissions(NO_PERMISSION.toArray(new String[NO_PERMISSION.size()]), REQUEST_CAMERA);
-            }
-        } else {
-            recordVideo();
-        }
-    }
-
-    private void recordVideo() {
-        Log.d("MainActivity", "有权限了");
-    }
-
-    /**
-     * 初始化打印相关信息
-     */
-    public void init() {
-        //初始化为针打printer
-        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
-        printerFactory = new UniversalPrinterFactory();
-        rtPrinter = printerFactory.create();
-        PrinterObserverManager.getInstance().add(this);//添加连接状态监听
     }
 
     @Override
@@ -291,4 +236,30 @@ public class MainActivity  extends BaseActivity implements View.OnClickListener,
     public void printerReadMsgCallback(PrinterInterface printerInterface, byte[] bytes) {
 
     }
+
+    /**
+     * 校验权限
+     */
+    private void CheckAllPermission() {
+        NO_PERMISSION.clear();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (int i = 0; i < NEED_PERMISSION.length; i++) {
+                if (checkSelfPermission(NEED_PERMISSION[i]) != PackageManager.PERMISSION_GRANTED) {
+                    NO_PERMISSION.add(NEED_PERMISSION[i]);
+                }
+            }
+            if (NO_PERMISSION.size() == 0) {
+                recordVideo();
+            } else {
+                requestPermissions(NO_PERMISSION.toArray(new String[NO_PERMISSION.size()]), REQUEST_CAMERA);
+            }
+        } else {
+            recordVideo();
+        }
+    }
+
+    private void recordVideo() {
+        Log.d("MainActivity", "有权限了");
+    }
+
 }

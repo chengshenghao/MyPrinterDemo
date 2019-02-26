@@ -6,63 +6,6 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="@string/command_type" />
-
-    <com.tcsl.myprinterdemo.view.FlowRadioGroup
-        android:id="@+id/rg_cmdtype"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:orientation="horizontal">
-
-        <RadioButton
-            android:id="@+id/rb_cmd_esc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cmdtype_esc" />
-
-        <RadioButton
-            android:id="@+id/rb_cmd_tsc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cmdtype_tsc" />
-
-    </com.tcsl.myprinterdemo.view.FlowRadioGroup>
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:padding="5dp"
-        android:text="@string/connect_type" />
-
-    <com.tcsl.myprinterdemo.view.FlowRadioGroup
-        android:id="@+id/rg_connect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:orientation="horizontal">
-
-
-        <RadioButton
-            android:id="@+id/rb_connect_usb"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="USB"
-            android:visibility="visible" />
-
-    </com.tcsl.myprinterdemo.view.FlowRadioGroup>
 
     <ProgressBar
         android:id="@+id/pb_connect"
